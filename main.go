@@ -7,10 +7,10 @@ import (
 )
 
 type FileOrganizer struct {
-	sourceDir     string
-	rulesMap      map[string]string
-	ProcessedFile int
-	logFile       *os.File
+	sourceDir      string
+	rulesMap       map[string]string
+	ProcessedFiles int
+	logFile        *os.File
 }
 
 func main() {
@@ -55,9 +55,9 @@ func NewFileOrganizer(sourceDir string) (*FileOrganizer, error) {
 	}
 
 	return &FileOrganizer{
-		sourceDir:     sourceDir,
-		rulesMap:      map[string]string{},
-		ProcessedFile: 0,
-		logFile:       nil,
+		sourceDir:      sourceDir,
+		rulesMap:       map[string]string{},
+		ProcessedFiles: 0,
+		logFile:        nil,
 	}, nil
 }
