@@ -51,7 +51,7 @@ func NewFileOrganizer(sourceDir string) (*FileOrganizer, error) {
 	if info.IsDir() {
 		fmt.Println("dir:", info.Name())
 	} else {
-		fmt.Println("file:", info.Name())
+		return nil, fmt.Errorf("Директорію не знайдено: %s є файлом", info.Name())
 	}
 
 	return &FileOrganizer{
