@@ -54,5 +54,10 @@ func NewFileOrganizer(sourceDir string) (*FileOrganizer, error) {
 		fmt.Println("file:", info.Name())
 	}
 
-	return &FileOrganizer{}, nil
+	return &FileOrganizer{
+		sourceDir:     sourceDir,
+		rulesMap:      map[string]string{},
+		ProcessedFile: 0,
+		logFile:       nil,
+	}, nil
 }
