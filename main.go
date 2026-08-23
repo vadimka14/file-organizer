@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -30,28 +31,34 @@ func main() {
 		".rar":  "Archives",
 	}
 
+	var dir string = "./banks"
+
 	for key, value := range DefaultRules {
 		fmt.Printf("Расширение: %s -> Папка: %s\n", key, value)
 	}
+
+	_, err := NewFileOrganizer(dir)
+	if err != nil {
+		log.Fatalf("Ошибка: %v", err)
+	}
+	fmt.Printf("FileOrganizer создан для директории: %s\n", dir)
 
 }
 
 func NewFileOrganizer(sourceDir string) (*FileOrganizer, error) {
 	if len(sourceDir) == 0 {
-		return nil, fmt.Errorf("")
+		return nil, fmt.Errorf("директория не указана")
 	}
 	info, err := os.Stat(sourceDir)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			fmt.Println("Файла нет")
+			return nil, fmt.Errorf("директория не найдена: %w", err)
 		}
-		return nil, err
+		return nil, fmt.Errorf("директория не найдена: %w", err)
 	}
 
-	if info.IsDir() {
-		fmt.Println("dir:", info.Name())
-	} else {
-		return nil, fmt.Errorf("Директорію не знайдено: %s є файлом", info.Name())
+	if !info.IsDir() {
+		return nil, fmt.Errorf("директория не найдена: %s является файлом", info.Name())
 	}
 
 	return &FileOrganizer{
