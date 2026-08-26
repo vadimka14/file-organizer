@@ -68,3 +68,29 @@ func NewFileOrganizer(sourceDir string) (*FileOrganizer, error) {
 		logFile:        nil,
 	}, nil
 }
+
+func (fo *FileOrganizer) initLog() error {
+	file, err := os.OpenFile("organizer.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	fo.logFile = file
+	log.SetOutput(fo.logFile)
+
+	return nil
+}
+
+func (fo *FileOrganizer) logSuccess(message string) {
+	log.Printf("[SUCCESS] %s\n", message)
+}
+
+func (fo *FileOrganizer) logError(message string) {
+	log.Printf("[ERROR] %s\n", message)
+}
+
+func (fo *FileOrganizer) Close() error {
+	if fo.logFile != nil {
+		return fo.logFile.Close()
+	}
+	return nil
+}
