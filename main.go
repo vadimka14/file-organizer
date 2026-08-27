@@ -41,7 +41,7 @@ func main() {
 		fmt.Printf("Расширение: %s -> Папка: %s\n", key, value)
 	}
 
-	_, err := NewFileOrganizer(dir)
+	_, err := NewFileOrganizer(dir, DefaultRules)
 	if err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}
@@ -49,7 +49,7 @@ func main() {
 
 }
 
-func NewFileOrganizer(sourceDir string) (*FileOrganizer, error) {
+func NewFileOrganizer(sourceDir string, rulesMap map[string]string) (*FileOrganizer, error) {
 	if len(sourceDir) == 0 {
 		return nil, fmt.Errorf("директория не указана")
 	}
@@ -67,7 +67,7 @@ func NewFileOrganizer(sourceDir string) (*FileOrganizer, error) {
 
 	return &FileOrganizer{
 		sourceDir:      sourceDir,
-		rulesMap:       map[string]string{},
+		rulesMap:       rulesMap,
 		processedFiles: 0,
 		logFile:        nil,
 	}, nil
