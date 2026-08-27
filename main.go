@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
+	"time"
 )
 
 type FileOrganizer struct {
@@ -92,5 +95,38 @@ func (fo *FileOrganizer) Close() error {
 	if fo.logFile != nil {
 		return fo.logFile.Close()
 	}
+	return nil
+}
+
+func (fo *FileOrganizer) moveFile(sourcePath, targetDir string) error {
+	fullPath := filepath.Join(fo.sourceDir, targetDir)
+	err := os.MkdirAll(fullPath, 0755)
+	if err != nil {
+		return err
+	}
+
+	nameFile := filepath.Base(sourcePath)
+
+	targetFullPath := filepath.Join(fullPath, nameFile)
+
+	_, err = os.Stat(targetFullPath)
+	if err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("moveFile: %w", err)
+		}
+	} else {
+		ext := filepath.Ext(nameFile)
+		base := strings.TrimSuffix(nameFile, ext)
+		newNameFile := base + "_" + time.Now().Format("2006-01-02_15-04-05") + ext
+		targetFullPath = filepath.Join(fullPath, newNameFile)
+	}
+	err = os.Rename(sourcePath, targetFullPath)
+	if err != nil {
+		msg := fmt.Sprintf("не удалось переместить файл %q: %v", nameFile, err)
+		fo.logError(msg)
+		return fmt.Errorf("moveFile: %w", err)
+	}
+	msg := fmt.Sprintf("файл %q перемещён в директорию %q", nameFile, targetDir)
+	fo.logSuccess(msg)
 	return nil
 }
