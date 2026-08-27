@@ -17,6 +17,8 @@ type FileOrganizer struct {
 	rulesMap       map[string]string
 	processedFiles int
 	logFile        *os.File
+	statistics     map[string]*FileStats
+	totalSize      int64
 }
 
 type FileStats struct {
@@ -56,6 +58,7 @@ func main() {
 }
 
 func NewFileOrganizer(sourceDir string, rulesMap map[string]string) (*FileOrganizer, error) {
+	statistics := make(map[string]*FileStats)
 	if len(sourceDir) == 0 {
 		return nil, fmt.Errorf("директория не указана")
 	}
@@ -64,7 +67,7 @@ func NewFileOrganizer(sourceDir string, rulesMap map[string]string) (*FileOrgani
 		if errors.Is(err, os.ErrNotExist) {
 			return nil, fmt.Errorf("директория не найдена: %w", err)
 		}
-		return nil, fmt.Errorf("директория не найдена: %w", err)
+		return nil, fmt.Errorf("не удалось проверить директорию: %w", err)
 	}
 
 	if !info.IsDir() {
@@ -76,6 +79,8 @@ func NewFileOrganizer(sourceDir string, rulesMap map[string]string) (*FileOrgani
 		rulesMap:       rulesMap,
 		processedFiles: 0,
 		logFile:        nil,
+		statistics:     statistics,
+		totalSize:      0,
 	}, nil
 }
 
@@ -106,8 +111,14 @@ func (fo *FileOrganizer) Close() error {
 }
 
 func (fo *FileOrganizer) moveFile(sourcePath, targetDir string) error {
+	info, err := os.Stat(sourcePath)
+	if err != nil {
+		return fmt.Errorf("moveFile: %w", err)
+	}
+	sizeOfFile := info.Size()
+
 	fullPath := filepath.Join(fo.sourceDir, targetDir)
-	err := os.MkdirAll(fullPath, 0755)
+	err = os.MkdirAll(fullPath, 0755)
 	if err != nil {
 		msg := fmt.Sprintf("не удалось создать директорию %s: %v", targetDir, err)
 		fo.logError(msg)
@@ -139,6 +150,12 @@ func (fo *FileOrganizer) moveFile(sourcePath, targetDir string) error {
 	}
 	msg := fmt.Sprintf("файл %q перемещён в директорию %q", nameFile, targetDir)
 	fo.logSuccess(msg)
+	_, ok := fo.statistics[targetDir]
+	if !ok {
+		fo.statistics[targetDir] = &FileStats{countFiles: 0, sumSize: 0}
+	}
+	fo.statistics[targetDir].countFiles++
+	fo.statistics[targetDir].sumSize += sizeOfFile
 	return nil
 }
 
