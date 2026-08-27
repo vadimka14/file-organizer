@@ -152,6 +152,7 @@ func (fo *FileOrganizer) moveFile(sourcePath, targetDir string, info os.FileInfo
 	}
 	fo.statistics[targetDir].countFiles++
 	fo.statistics[targetDir].sumSize += sizeOfFile
+	fo.totalSize += sizeOfFile
 	return nil
 }
 
@@ -194,4 +195,16 @@ func (fo *FileOrganizer) Organize() error {
 
 func (fs *FileStats) String() string {
 	return fmt.Sprintf("Файлов: %d, Размер: %.2f KB", fs.countFiles, math.Floor((float64(fs.sumSize)/1024)*100)/100)
+}
+
+func (fo *FileOrganizer) generateReport() string {
+	var sb strings.Builder
+	sb.WriteString("=== Отчёт о перемещении файлов ===\n\n")
+	sb.WriteString(fmt.Sprintf("Всего обработано файлов: %d\n", fo.processedFiles))
+	sb.WriteString(fmt.Sprintf("Общий размер: %.2f KB\n", math.Floor((float64(fo.totalSize)/1024)*100)/100))
+	for category, stats := range fo.statistics {
+		sb.WriteString(fmt.Sprintf("%s:\n  %s\n\n", category, stats.String()))
+	}
+	result := sb.String()
+	return result
 }
