@@ -110,15 +110,11 @@ func (fo *FileOrganizer) Close() error {
 	return nil
 }
 
-func (fo *FileOrganizer) moveFile(sourcePath, targetDir string) error {
-	info, err := os.Stat(sourcePath)
-	if err != nil {
-		return fmt.Errorf("moveFile: %w", err)
-	}
+func (fo *FileOrganizer) moveFile(sourcePath, targetDir string, info os.FileInfo) error {
 	sizeOfFile := info.Size()
 
 	fullPath := filepath.Join(fo.sourceDir, targetDir)
-	err = os.MkdirAll(fullPath, 0755)
+	err := os.MkdirAll(fullPath, 0755)
 	if err != nil {
 		msg := fmt.Sprintf("не удалось создать директорию %s: %v", targetDir, err)
 		fo.logError(msg)
@@ -180,7 +176,11 @@ func (fo *FileOrganizer) Organize() error {
 
 		currentDir, ok := fo.rulesMap[strings.ToLower(filepath.Ext(path))]
 		if ok {
-			err := fo.moveFile(path, currentDir)
+			info, err := d.Info()
+			if err != nil {
+				return nil
+			}
+			err = fo.moveFile(path, currentDir, info)
 			if err != nil {
 				return nil
 			}
