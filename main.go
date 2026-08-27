@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -133,4 +134,37 @@ func (fo *FileOrganizer) moveFile(sourcePath, targetDir string) error {
 	msg := fmt.Sprintf("файл %q перемещён в директорию %q", nameFile, targetDir)
 	fo.logSuccess(msg)
 	return nil
+}
+
+func (fo *FileOrganizer) Organize() error {
+	err := fo.initLog()
+	if err != nil {
+		return err
+	}
+
+	err = filepath.WalkDir(fo.sourceDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		if filepath.Dir(path) != fo.sourceDir {
+			return nil
+		}
+
+		currentDir, ok := fo.rulesMap[strings.ToLower(filepath.Ext(path))]
+		if ok {
+			err := fo.moveFile(path, currentDir)
+			if err != nil {
+				return nil
+			}
+			fo.processedFiles++
+		}
+
+		return nil
+	})
+	return err
 }
