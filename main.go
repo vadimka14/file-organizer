@@ -102,7 +102,9 @@ func (fo *FileOrganizer) moveFile(sourcePath, targetDir string) error {
 	fullPath := filepath.Join(fo.sourceDir, targetDir)
 	err := os.MkdirAll(fullPath, 0755)
 	if err != nil {
-		return err
+		msg := fmt.Sprintf("не удалось создать директорию %s: %v", targetDir, err)
+		fo.logError(msg)
+		return fmt.Errorf("moveFile: %w", err)
 	}
 
 	nameFile := filepath.Base(sourcePath)
@@ -112,6 +114,8 @@ func (fo *FileOrganizer) moveFile(sourcePath, targetDir string) error {
 	_, err = os.Stat(targetFullPath)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
+			msg := fmt.Sprintf("не удалось проверить файл %q: %v", targetFullPath, err)
+			fo.logError(msg)
 			return fmt.Errorf("moveFile: %w", err)
 		}
 	} else {
