@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,11 @@ type FileOrganizer struct {
 	rulesMap       map[string]string
 	processedFiles int
 	logFile        *os.File
+}
+
+type FileStats struct {
+	countFiles int
+	sumSize    int64
 }
 
 func main() {
@@ -167,4 +173,8 @@ func (fo *FileOrganizer) Organize() error {
 		return nil
 	})
 	return err
+}
+
+func (fs *FileStats) String() string {
+	return fmt.Sprintf("Файлов: %d, Размер: %.2f KB", fs.countFiles, math.Floor((float64(fs.sumSize)/1024)*100)/100)
 }
