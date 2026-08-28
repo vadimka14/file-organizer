@@ -12,7 +12,7 @@
 ## Установка
  
 ```bash
-git clone https://github.com/username/file-organizer.git
+git clone https://github.com/vadimka14/file-organizer.git
 cd file-organizer
 go build
 ```
