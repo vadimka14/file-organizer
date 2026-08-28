@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -43,18 +44,27 @@ func main() {
 		".rar":  "Archives",
 	}
 
-	var dir string = "./banks"
-
-	for key, value := range DefaultRules {
-		fmt.Printf("Расширение: %s -> Папка: %s\n", key, value)
+	fmt.Println("=== Файловый органайзер ===")
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Введите путь к директории для организации (Enter для текущей директории):")
+	input, _ := reader.ReadString('\n')
+	sourcePath := strings.TrimSpace(input)
+	if len(sourcePath) == 0 {
+		sourcePath, _ = os.Getwd()
 	}
 
-	_, err := NewFileOrganizer(dir, DefaultRules)
+	organizer, err := NewFileOrganizer(sourcePath, DefaultRules)
 	if err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}
-	fmt.Printf("FileOrganizer создан для директории: %s\n", dir)
+	fmt.Printf("FileOrganizer создан для директории: %s\n", sourcePath)
 
+	organizer.Organize()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(organizer.generateReport())
 }
 
 func NewFileOrganizer(sourceDir string, rulesMap map[string]string) (*FileOrganizer, error) {
