@@ -57,7 +57,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Ошибка: %v", err)
 	}
-	fmt.Printf("FileOrganizer создан для директории: %s\n", sourcePath)
+	defer organizer.Close()
 
 	err = organizer.Organize()
 	if err != nil {
