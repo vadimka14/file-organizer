@@ -59,7 +59,7 @@ func main() {
 	}
 	fmt.Printf("FileOrganizer создан для директории: %s\n", sourcePath)
 
-	organizer.Organize()
+	err = organizer.Organize()
 	if err != nil {
 		log.Fatal(err)
 	}
