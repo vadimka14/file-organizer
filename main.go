@@ -46,7 +46,7 @@ func main() {
 
 	fmt.Println("=== Файловый органайзер ===")
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Введите путь к директории для организации (Enter для текущей директории):")
+	fmt.Print("Введите путь к директории для организации (Enter для текущей директории): ")
 	input, _ := reader.ReadString('\n')
 	sourcePath := strings.TrimSpace(input)
 	if len(sourcePath) == 0 {
@@ -59,12 +59,15 @@ func main() {
 	}
 	defer organizer.Close()
 
+	fmt.Println("Начинаем организацию файлов...")
 	err = organizer.Organize()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println(organizer.generateReport())
+
+	fmt.Println("Организация завершена! Подробности в файле organizer.log")
 }
 
 func NewFileOrganizer(sourceDir string, rulesMap map[string]string) (*FileOrganizer, error) {
